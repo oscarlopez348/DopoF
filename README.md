@@ -123,7 +123,8 @@ WORLDS HARDEST GAME/
 
 #### Diseño estructural
 
-> _[Insertar diagrama de clases mostrando: `MonedaPulso extends Moneda`, `Nivel` con atributos `pulsoActivo: boolean` y `tiempoRestantePulso: double`, cambios en `GestorPartida`]_
+<img width="399" height="257" alt="image" src="https://github.com/user-attachments/assets/8fbc5286-a3a9-4c3c-abce-2fb18d96c7aa" />
+
 
 Clases nuevas/modificadas:
 - **`MonedaPulso`** (nueva) — extiende `Moneda`, devuelve color `#00CFFF`
