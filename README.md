@@ -304,39 +304,10 @@ public class MonedaPulsoTest {
     }
 }
 
-// NivelTest.java — tests relacionados con el pulso
-@Test
-void alRecolectarMonedaPulsoSeLanzaPulsoActivo() {
-    nivel.agregarMoneda(new dominio.objetivos.MonedaPulso(3, 3));
-    nivel.recogerMonedasEn(3, 3, jugador);
-    assertTrue(nivel.isPulsoActivo());
-}
 
-@Test
-void pulsoSeReiniciaSiYaEstabaActivo() {
-    nivel.activarPulso();
-    nivel.descontarTiempoPulso(1.5);
-    nivel.agregarMoneda(new dominio.objetivos.MonedaPulso(3, 3));
-    nivel.recogerMonedasEn(3, 3, jugador);
-    assertEquals(3.0, nivel.getTiempoRestantePulso(), 0.001);
-}
 
-@Test
-void pulsoSeDesactivaAlAgotarseTiempo() {
-    nivel.activarPulso();
-    nivel.descontarTiempoPulso(3.1);
-    assertFalse(nivel.isPulsoActivo());
-}
+<img width="1112" height="236" alt="image" src="https://github.com/user-attachments/assets/d2bb975d-33dd-47b8-aff0-15ca69393932" />
 
-@Test
-void tiempoDelNivelNOAvanzaMientrasPulsoActivo() {
-    nivel.activarPulso();
-    if (!nivel.isPulsoActivo()) nivel.avanzarTiempo();
-    assertEquals(60, nivel.getTiempoRestante());
-}
-```
-
-> _[Insertar captura JUnit en verde]_
 
 #### Prueba de aceptación
 
