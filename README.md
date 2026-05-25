@@ -1,4 +1,3 @@
-
 **Nombre:** Oscar Daniel Lopez Cruz  
 
 ---
@@ -13,7 +12,7 @@ WORLDS HARDEST GAME/
 │   │   ├── enemigos/       (Enemigo, PuntoAzulBasico, PuntoAzulPatrullero, PuntoAcelerado, DeslizadorVertical)
 │   │   ├── juego/          (Tablero, Nivel, Celda, TipoCelda, Direccion)
 │   │   ├── modos/          (ModoJuego, ModoPlayer, ModoPvsP, ModoPlayerVsMaquina)
-│   │   ├── objetivos/      (Moneda, MonedaAmarilla, MonedaSkin)
+│   │   ├── objetivos/      (Moneda, MonedaAmarilla, MonedaSkin, MonedaPulso)
 │   │   ├── personajes/     (Cuadrado, CuadradoRojo, CuadradoAzul, CuadradoVerde)
 │   │   ├── persistencia/   (GestorPartida, LectorConfiguracion)
 │   │   └── zonas/          (Zona, ZonaInicial, ZonaFinal)
@@ -31,10 +30,6 @@ WORLDS HARDEST GAME/
 
 > _[Explicar aquí cuál de los 3 comportamientos candidatos se seleccionó y por qué. Describir las deficiencias concretas del código actual: si usa `instanceof`, cadenas de `if/else`, violación de OCP, SRP, etc.]_
 
-**Ejemplo orientativo si se elige el comportamiento de recolectar monedas (`recogerMonedasEn` en `Nivel.java`):**
-
-El método `recogerMonedasEn(int, int, Cuadrado)` en `Nivel` identifica el tipo de moneda con `instanceof MonedaSkin` y aplica el efecto directamente. Esto viola el **Principio Abierto/Cerrado (OCP)**: agregar un nuevo tipo de moneda obliga a modificar `Nivel`. También viola el **Principio de Responsabilidad Única (SRP)**, pues `Nivel` conoce los efectos específicos de cada moneda.
-
 ---
 
 ### 2. Componentes BDD-MDD del comportamiento actual
@@ -43,69 +38,50 @@ El método `recogerMonedasEn(int, int, Cuadrado)` en `Nivel` identifica el tipo 
 
 | ID | Descripción |
 |----|-------------|
-| R-01 | Cuando el jugador ocupa la casilla de una `MonedaAmarilla`, esta queda marcada como recolectada. |
-| R-02 | Cuando el jugador ocupa la casilla de una `MonedaSkin`, esta queda marcada como recolectada y se aplica el skin temporal al jugador. |
-| R-03 | Al recolectar cualquier moneda, se limpia el skin temporal previo antes de aplicar el nuevo efecto. |
-| R-04 | Todas las monedas deben estar recolectadas para completar el nivel. |
+| R-01 | |
+| R-02 | |
 
 #### Diseño estructural (zona del diagrama de clases relevante)
 
-> _[Insertar recorte del diagrama Astah mostrando Nivel → Moneda → MonedaAmarilla / MonedaSkin]_
-
-Clases involucradas: `Nivel`, `Moneda` (abstracta), `MonedaAmarilla`, `MonedaSkin`, `Cuadrado`.
+> _[Insertar recorte del diagrama Astah]_
 
 #### Diseño de comportamiento (diagrama de secuencia)
 
-> _[Insertar diagrama de secuencia: jugador mueve → Nivel.recogerMonedasEn → m instanceof MonedaSkin → jugador.aplicarSkinTemporal]_
+> _[Insertar diagrama de secuencia]_
 
 #### Código — capa presentación
 
 ```java
-// PanelJuego.java (fragmento relevante — ciclo de juego que llama a recogerMonedasEn)
-// [pegar aquí el método de PanelJuego que invoca nivel.recogerMonedasEn]
+// [pegar aquí el fragmento relevante]
 ```
 
 #### Código — capa aplicación
 
 ```java
-// Nivel.java
-public void recogerMonedasEn(int fila, int columna, Cuadrado jugador) {
-    for (Moneda m : monedas) {
-        if (!m.estaRecolectada() && m.getFila() == fila && m.getColumna() == columna) {
-            jugador.limpiarSkinTemporal();
-            m.recolectar(jugador);
-            if (m instanceof MonedaSkin ms) {          // ← acoplamiento problemático
-                jugador.aplicarSkinTemporal(ms.getSkinAsociado());
-            }
-        }
-    }
-}
+// [pegar aquí el código actual con el problema]
 ```
 
 #### Pruebas de unidad (actuales)
 
 ```java
-// MonedaTest.java — [pegar aquí los tests relevantes y captura de ejecución]
+// [pegar aquí los tests relevantes]
 ```
 
 #### Prueba de aceptación
 
 | Escenario | Resultado esperado |
 |-----------|-------------------|
-| Jugador pisa casilla de MonedaAmarilla | Moneda queda `recolectada = true`; sin cambio de skin |
-| Jugador pisa casilla de MonedaSkin (Azul) | Moneda recolectada y `getSkinTemporal() == "Azul"` |
+| | |
 
-> _[Insertar dos pantallas del juego mostrando el comportamiento]_
+> _[Insertar pantallas del juego]_
 
 ---
 
 ### 3. Patrón de diseño propuesto
 
-**Patrón:** Strategy (o Visitor / Template Method — justificar la elección concreta)
+**Patrón:** _[indicar cuál]_
 
-**Justificación:**
-
-Aplicar **Strategy** permite encapsular el efecto de cada tipo de moneda en una clase separada (`EfectoMoneda`). `Nivel` delega la aplicación del efecto a la moneda misma sin necesidad de conocer su tipo concreto, cumpliendo OCP (nuevas monedas solo agregan nuevas clases) y SRP (cada clase de efecto tiene una única responsabilidad).
+**Justificación:** _[explicar por qué este patrón resuelve las deficiencias]_
 
 ---
 
@@ -113,41 +89,17 @@ Aplicar **Strategy** permite encapsular el efecto de cada tipo de moneda en una 
 
 #### Cambios en diseño estructural
 
-> _[Insertar diagrama de clases actualizado: Moneda ahora tiene método `aplicarEfecto(Cuadrado)` o se introduce interfaz `EfectoMoneda`]_
+> _[Insertar diagrama de clases actualizado]_
 
 #### Cambios en código
 
 ```java
-// Moneda.java — nuevo método abstracto
-public abstract void aplicarEfecto(Cuadrado jugador);
-
-// MonedaAmarilla.java
-@Override
-public void aplicarEfecto(Cuadrado jugador) {
-    // sin efecto adicional
-}
-
-// MonedaSkin.java
-@Override
-public void aplicarEfecto(Cuadrado jugador) {
-    jugador.aplicarSkinTemporal(skinAsociado);
-}
-
-// Nivel.java — refactorizado
-public void recogerMonedasEn(int fila, int columna, Cuadrado jugador) {
-    for (Moneda m : monedas) {
-        if (!m.estaRecolectada() && m.getFila() == fila && m.getColumna() == columna) {
-            jugador.limpiarSkinTemporal();
-            m.recolectar(jugador);
-            m.aplicarEfecto(jugador);   // ← sin instanceof
-        }
-    }
-}
+// [pegar aquí el código refactorizado]
 ```
 
 #### Pruebas siguen pasando
 
-> _[Insertar captura de ejecución de tests después de la refactorización — verde en JUnit]_
+> _[Insertar captura de ejecución de tests — verde en JUnit]_
 
 ---
 
@@ -162,38 +114,78 @@ public void recogerMonedasEn(int fila, int columna, Cuadrado jugador) {
 | R-P01 | Al recolectar una `MonedaPulso`, todos los enemigos quedan congelados (no se mueven, no matan) durante 3 segundos. |
 | R-P02 | Mientras el pulso está activo, el tiempo del nivel no avanza. |
 | R-P03 | Al recolectar una `MonedaPulso` con pulso ya activo, el cronómetro se reinicia a 3 segundos. |
-| R-P04 | La skin del/los jugador(es) cambia visualmente a la skin de inmunidad mientras dure el pulso. |
+| R-P04 | La skin del jugador cambia visualmente a la skin de inmunidad ("Pulso") mientras dure el pulso. |
 | R-P05 | Al terminar el pulso, cada enemigo retoma su movimiento desde la posición donde quedó congelado. |
-| R-P06 | En modos PvsP y PvsM, el efecto sobre los enemigos es global; si los dos jugadores se tocan durante el pulso, no pasa nada. |
+| R-P06 | En modos PvsP y PvsM, el efecto sobre los enemigos es global. |
 | R-P07 | La `MonedaPulso` debe recolectarse para completar el nivel (igual que `MonedaAmarilla`). |
 | R-P08 | La `MonedaPulso` se declara en el `.txt` de configuración con el identificador `PU`. |
 | R-P09 | Al guardar con pulso activo, se persiste el tiempo restante del pulso. Al cargar, se restaura correctamente. |
 
 #### Diseño estructural
 
-> _[Insertar diagrama de clases mostrando: `MonedaPulso extends Moneda`, `Nivel` con atributos `pulsoActivo: boolean` y `tiempoRestantePulso: double`, cambios en `Enemigo.mover()`, cambios en `GestorPartida`]_
+> _[Insertar diagrama de clases mostrando: `MonedaPulso extends Moneda`, `Nivel` con atributos `pulsoActivo: boolean` y `tiempoRestantePulso: double`, cambios en `GestorPartida`]_
 
 Clases nuevas/modificadas:
-- **`MonedaPulso`** (nueva) — extiende `Moneda`, sobreescribe `aplicarEfecto` y `getColor`
-- **`Nivel`** — agrega `pulsoActivo`, `tiempoRestantePulso`, métodos `activarPulso()`, `tick pulso`
-- **`Enemigo`** — respeta el estado `congelado` antes de mover
-- **`GestorPartida`** — persiste y restaura `pulso_tiempo`
+- **`MonedaPulso`** (nueva) — extiende `Moneda`, devuelve color `#00CFFF`
+- **`Nivel`** — agrega `pulsoActivo`, `tiempoRestantePulso`, métodos `activarPulso()` y `descontarTiempoPulso()`
+- **`GestorPartida`** — persiste `pulso_activo` y `pulso_tiempo` al guardar
 - **`LectorConfiguracion`** — reconoce el token `PU` en el `.txt`
 
 #### Diseño de comportamiento (diagramas de secuencia)
 
-> _[Secuencia 1: jugador pisa MonedaPulso → Nivel.recogerMonedasEn → MonedaPulso.aplicarEfecto → nivel.activarPulso → congela enemigos]_
+> _[Secuencia 1: jugador pisa MonedaPulso → Nivel.recogerMonedasEn → activarPulso() → pulsoActivo=true, tiempoRestante=3.0 → jugador.aplicarSkinTemporal("Pulso")]_
 
-> _[Secuencia 2: tick del juego con pulso activo → nivel.tickPulso → si termina, descongela enemigos y restaura skin]_
+> _[Secuencia 2: tick del juego con pulso activo → timerLogica llama descontarTiempoPulso(0.25) → si tiempoRestante≤0, pulsoActivo=false → enemigos retoman movimiento en siguiente tick]_
 
 #### Código — capa presentación
 
 ```java
-// PanelJuego.java — en el timer del juego
-// Si pulso activo: no llamar nivel.avanzarTiempo(); pintar moneda con color distinto;
-// pintar jugador con color de inmunidad.
+// VentanaPrincipal.java — dentro de iniciarGameLoopPlayer()
 
-// [Pegar aquí el fragmento real del timer/paintComponent modificado]
+// timerLogica (cada 250 ms): mueve enemigos solo si el pulso NO está activo
+timerLogica = new Timer(250, e -> {
+    if (pausado) return;
+    if (!nivel.isPulsoActivo()) {
+        nivel.actualizarEnemigos();
+        nivel.verificarColisiones(modoPlayer.getJugador());
+    }
+    nivel.descontarTiempoPulso(0.25); // descuenta 0.25s cada tick
+    actualizarHUDPlayer();
+    verificarEstadoPlayer();
+    panelJuego.repaint();
+});
+
+// timerSegundo (cada 1000 ms): el tiempo del nivel NO avanza si hay pulso activo
+timerSegundo = new Timer(1000, e -> {
+    if (pausado) return;
+    if (!nivel.isPulsoActivo()) {
+        nivel.avanzarTiempo(); // tiempo congelado mientras dure el pulso
+    }
+    actualizarHUDPlayer();
+    panelJuego.repaint();
+    if (nivel.tiempoAgotado()) {
+        detenerTimers();
+        JOptionPane.showMessageDialog(this,
+            "Tiempo agotado!\nMuertes: " + modoPlayer.getJugador().getMuertes(),
+            "Game Over", JOptionPane.WARNING_MESSAGE);
+        volverAlMenu();
+    }
+});
+
+// PanelJuego.paintComponent — la MonedaPulso se dibuja como rombo celeste con "P"
+if (m instanceof MonedaPulso) {
+    g2.setColor(colorMoneda);
+    int[] xPoints = {cx, cx+8, cx, cx-8};
+    int[] yPoints = {cy-9, cy, cy+9, cy};
+    g2.fillPolygon(xPoints, yPoints, 4);
+    g2.setColor(colorMoneda.darker());
+    g2.drawPolygon(xPoints, yPoints, 4);
+    g2.setColor(Color.WHITE);
+    g2.setFont(new Font("Arial Black", Font.BOLD, 7));
+    g2.drawString("P", cx-3, cy+3);
+}
+// Skin del jugador durante el pulso:
+// En dibujarJugador(), si getSkinTemporal().equals("Pulso") → colorHex = "#00CFFF"
 ```
 
 #### Código — capa aplicación
@@ -209,99 +201,156 @@ public class MonedaPulso extends Moneda {
     }
 
     @Override
-    public void aplicarEfecto(dominio.personajes.Cuadrado jugador) {
-        // El efecto real (congelar enemigos) lo activa Nivel al delegar
-        // Se puede dejar vacío si Nivel detecta el tipo, o usar el patrón
-        // con referencia al nivel — documentar la decisión de diseño tomada.
-    }
-
-    @Override
     public String getColor() {
-        return "#00CFFF"; // azul cyan — diferente a amarillo y skins
+        return "#00CFFF"; // celeste/cian, diferenciado de amarillo y skins
     }
 }
 
-// Nivel.java — nuevos atributos y métodos
+// Nivel.java — atributos para el pulso
 private boolean pulsoActivo = false;
 private double tiempoRestantePulso = 0.0;
 
-public void activarPulso(double duracion) {
-    pulsoActivo = true;
-    tiempoRestantePulso = duracion;
-    // congelar enemigos
-    for (Enemigo e : enemigos) e.setCongelado(true);
+// Nivel.java — recogerMonedasEn detecta MonedaPulso y activa el pulso
+public void recogerMonedasEn(int fila, int columna, Cuadrado jugador) {
+    for (Moneda m : monedas) {
+        if (!m.estaRecolectada() && m.getFila() == fila && m.getColumna() == columna) {
+            jugador.limpiarSkinTemporal();
+            m.recolectar(jugador);
+            if (m instanceof MonedaSkin ms) {
+                jugador.aplicarSkinTemporal(ms.getSkinAsociado());
+            } else if (m instanceof MonedaPulso) {
+                activarPulso();
+                jugador.aplicarSkinTemporal("Pulso");
+            }
+        }
+    }
 }
 
-public void tickPulso(double delta) {
-    if (!pulsoActivo) return;
-    tiempoRestantePulso -= delta;
-    if (tiempoRestantePulso <= 0) {
-        pulsoActivo = false;
-        tiempoRestantePulso = 0;
-        for (Enemigo e : enemigos) e.setCongelado(false);
+// Nivel.java — activarPulso() inicia o reinicia el contador a 3 segundos
+public void activarPulso() {
+    this.pulsoActivo = true;
+    this.tiempoRestantePulso = 3.0;
+}
+
+// Nivel.java — descontarTiempoPulso() llamado cada 250 ms desde VentanaPrincipal
+public void descontarTiempoPulso(double segundos) {
+    if (pulsoActivo) {
+        tiempoRestantePulso -= segundos;
+        if (tiempoRestantePulso <= 0) {
+            tiempoRestantePulso = 0;
+            pulsoActivo = false;
+        }
     }
 }
 
 public boolean isPulsoActivo() { return pulsoActivo; }
 public double getTiempoRestantePulso() { return tiempoRestantePulso; }
-public void setTiempoRestantePulso(double t) {
-    tiempoRestantePulso = t;
-    pulsoActivo = t > 0;
-    for (Enemigo e : enemigos) e.setCongelado(pulsoActivo);
+public void setPulsoActivo(boolean b) { this.pulsoActivo = b; }
+public void setTiempoRestantePulso(double t) { this.tiempoRestantePulso = t; }
+```
+
+#### Código — capa persistencia
+
+```java
+// GestorPartida.java — guardar() persiste el estado del pulso si está activo
+if (nivel.isPulsoActivo()) {
+    pw.println("pulso_activo=true");
+    pw.println("pulso_tiempo=" + nivel.getTiempoRestantePulso());
 }
 
-// Enemigo.java — nuevo campo
-private boolean congelado = false;
-public void setCongelado(boolean c) { this.congelado = c; }
-public boolean isCongelado() { return congelado; }
+// GestorPartida.cargar() devuelve el mapa con claves "pulso_activo" y "pulso_tiempo"
+// El modo los aplica con:
+//   nivel.setPulsoActivo(true);
+//   nivel.setTiempoRestantePulso(Double.parseDouble(datos.get("pulso_tiempo")));
 
-// En cada subclase de Enemigo, en mover():
-// if (congelado) return;
+// LectorConfiguracion.java — reconoce el token "PU" en la sección MONEDAS del .txt
+case "MONEDAS" -> {
+    String[] p = linea.split("\\s+");
+    if (p[0].equals("A"))
+        nivel.agregarMoneda(new MonedaAmarilla(Integer.parseInt(p[1]), Integer.parseInt(p[2])));
+    else if (p[0].equals("S"))
+        nivel.agregarMoneda(new MonedaSkin(Integer.parseInt(p[1]), Integer.parseInt(p[2]), p[3]));
+    else if (p[0].equals("PU"))
+        nivel.agregarMoneda(new MonedaPulso(Integer.parseInt(p[1]), Integer.parseInt(p[2])));
+}
+
+// nivel1.txt — declaración de MonedaPulso en el archivo de nivel
+// MONEDAS=
+// A 2 5
+// A 3 8
+// A 2 11
+// S 4 7 Azul
+// S 3 13 Verde
+// PU 5 10      ← MonedaPulso en fila 5, columna 10
 ```
 
 #### Pruebas de unidad
 
 ```java
 // MonedaPulsoTest.java
+package dominio.objetivos;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class MonedaPulsoTest {
+
+    @Test
+    public void testMonedaPulsoNoEstaRecolectadaInicial() {
+        MonedaPulso m = new MonedaPulso(2, 3);
+        assertFalse(m.estaRecolectada());
+    }
+
+    @Test
+    public void testMonedaPulsoTieneColorCeleste() {
+        MonedaPulso m = new MonedaPulso(1, 1);
+        assertEquals("#00CFFF", m.getColor());
+    }
+}
+
+// NivelTest.java — tests relacionados con el pulso
 @Test
-public void alRecolectarMonedaPulso_enemigosQuedan Congelados() {
-    // setup: nivel con un enemigo y una MonedaPulso en (2,3)
-    // mover jugador a (2,3)
-    // verificar nivel.isPulsoActivo() == true
-    // verificar enemigo.isCongelado() == true
+void alRecolectarMonedaPulsoSeLanzaPulsoActivo() {
+    nivel.agregarMoneda(new dominio.objetivos.MonedaPulso(3, 3));
+    nivel.recogerMonedasEn(3, 3, jugador);
+    assertTrue(nivel.isPulsoActivo());
 }
 
 @Test
-public void pulsoSeReiniciaSiSeRecolectaOtraMonedaPulso() {
-    // activar pulso, avanzar 1.5s, recolectar segunda MonedaPulso
-    // verificar tiempoRestantePulso ≈ 3.0
+void pulsoSeReiniciaSiYaEstabaActivo() {
+    nivel.activarPulso();
+    nivel.descontarTiempoPulso(1.5);
+    nivel.agregarMoneda(new dominio.objetivos.MonedaPulso(3, 3));
+    nivel.recogerMonedasEn(3, 3, jugador);
+    assertEquals(3.0, nivel.getTiempoRestantePulso(), 0.001);
 }
 
 @Test
-public void enemigosSeDescongelanAlTerminarPulso() {
-    // activar pulso con 0.1s
-    // tickPulso(0.2)
-    // verificar congelado == false en todos los enemigos
+void pulsoSeDesactivaAlAgotarseTiempo() {
+    nivel.activarPulso();
+    nivel.descontarTiempoPulso(3.1);
+    assertFalse(nivel.isPulsoActivo());
 }
 
 @Test
-public void tiempoDelNivelNOAvanzaMientrasPulsoActivo() {
-    // activar pulso; llamar lógica de tick del juego
-    // verificar que getTiempoRestante() no cambió
+void tiempoDelNivelNOAvanzaMientrasPulsoActivo() {
+    nivel.activarPulso();
+    if (!nivel.isPulsoActivo()) nivel.avanzarTiempo();
+    assertEquals(60, nivel.getTiempoRestante());
 }
-
-// [Insertar captura JUnit en verde]
 ```
+
+> _[Insertar captura JUnit en verde]_
 
 #### Prueba de aceptación
 
 | Escenario | Resultado esperado |
 |-----------|-------------------|
-| Jugador pisa `MonedaPulso` en nivel 1 | Moneda desaparece, todos los enemigos se detienen, skin del jugador cambia, timer del nivel se pausa |
-| 3 segundos después | Enemigos reanudan movimiento, skin vuelve a normal, timer del nivel continúa |
+| Jugador pisa `MonedaPulso` en nivel 1 (fila 5, col 10) | Moneda desaparece, `isPulsoActivo()==true`, enemigos no se mueven, skin del jugador cambia a celeste, timer del nivel se pausa |
+| 3 segundos después | `isPulsoActivo()==false`, enemigos reanudan movimiento, skin del jugador vuelve a la normal, timer del nivel continúa |
 
-> _[Pantalla 1: momento de recolección — enemigos visualmente detenidos, skin de inmunidad activa]_  
-> _[Pantalla 2: 3 s después — enemigos en movimiento, skin normal restaurada]_
+> _[Pantalla 1: momento de recolección — moneda rombo celeste visible, jugador con skin celeste "Pulso"]_  
+> _[Pantalla 2: 3 s después — skin normal restaurada, enemigos en movimiento]_
 
 ---
 
@@ -309,11 +358,11 @@ public void tiempoDelNivelNOAvanzaMientrasPulsoActivo() {
 
 | Capa | Cambio |
 |------|--------|
-| **Dominio** | `MonedaPulso` extiende `Moneda` y sobreescribe `aplicarEfecto`/`getColor`. `Nivel` incorpora el estado del pulso y su tick. `Enemigo` tiene el flag `congelado`. |
-| **Presentación** | `PanelJuego` consulta `nivel.isPulsoActivo()` para pausar el timer visual, pintar la moneda en cyan y mostrar la skin de inmunidad. |
-| **Persistencia** | `GestorPartida.guardar()` escribe `pulso_tiempo=X.X` si el pulso está activo. `cargar()` devuelve esa clave y el modo la restaura con `setTiempoRestantePulso()`. `LectorConfiguracion` reconoce `PU` en el `.txt` de nivel. |
+| **Dominio** | `MonedaPulso` extiende `Moneda` y sobreescribe `getColor()`. `Nivel` incorpora `pulsoActivo`, `tiempoRestantePulso`, `activarPulso()` y `descontarTiempoPulso()`. El control de congelación de enemigos se delega a la presentación consultando `isPulsoActivo()`. |
+| **Presentación** | `VentanaPrincipal` consulta `nivel.isPulsoActivo()` antes de llamar `actualizarEnemigos()` y antes de llamar `avanzarTiempo()`. `PanelJuego` dibuja `MonedaPulso` como rombo celeste con "P" y al jugador con skin celeste cuando `getSkinTemporal().equals("Pulso")`. |
+| **Persistencia** | `GestorPartida.guardar()` escribe `pulso_activo=true` y `pulso_tiempo=X.X` si el pulso está activo. `GestorPartida.cargar()` devuelve esas claves como parte del mapa. `LectorConfiguracion` reconoce el token `PU` en la sección `MONEDAS=` del `.txt` del nivel. |
 
-La extensibilidad se apoya en el patrón aplicado en la refactorización (método `aplicarEfecto` polimórfico): agregar `MonedaPulso` no modifica `Nivel.recogerMonedasEn`, solo agrega una nueva clase.
+La extensibilidad se apoya en la herencia de `Moneda`: agregar `MonedaPulso` no modifica ninguna clase existente salvo añadir el `case "PU"` en `LectorConfiguracion` y el `else if (m instanceof MonedaPulso)` en `Nivel.recogerMonedasEn`.
 
 ---
 
@@ -321,10 +370,9 @@ La extensibilidad se apoya en el patrón aplicado en la refactorización (métod
 
 | Patrón | Dónde aplica | Justificación |
 |--------|-------------|---------------|
-| **Strategy / Template Method** | `Moneda.aplicarEfecto(Cuadrado)` | Encapsula el efecto variable de cada tipo de moneda; `Nivel` no usa `instanceof`. Cumple OCP y SRP. |
-| **State** (implícito) | `Nivel` con `pulsoActivo` | El nivel se comporta de manera diferente (tiempo pausado, colisiones inofensivas) según el estado del pulso. Podría formalizarse con una clase `EstadoPulso`. |
-| **Observer** (si se aplica) | `Enemigo` escucha evento de pulso | Alternativa para desacoplar la activación del pulso de la iteración directa sobre la lista de enemigos. |
-| **Factory / LectorConfiguracion** | `LectorConfiguracion` crea monedas según token | Al agregar `PU`, solo se añade un `case "PU"` en el lector; el resto del sistema no cambia. |
+| **Template Method** | `Moneda.getColor()` abstracto | Cada subclase define su color; la lógica de dibujado en `PanelJuego` no necesita `instanceof` para el color. |
+| **State** (implícito) | `Nivel` con `pulsoActivo` | El nivel se comporta de manera diferente (tiempo pausado, enemigos inactivos) según el estado del pulso. |
+| **Factory** | `LectorConfiguracion` | Al agregar `PU`, solo se añade un `case` en el lector; el resto del sistema no cambia. |
 
 ---
 
@@ -335,11 +383,4 @@ La extensibilidad se apoya en el patrón aplicado en la refactorización (métod
 - **Diagramas:** Astah (`.asta` incluido en la raíz del proyecto)
 - **Testing:** JUnit 5
 
-## Autores
 
-- Francisco Gomez  
-- Oscar Lopez
-
-## Referencias
-
-> _[Listar aquí cualquier recurso externo consultado, según lo exige el punto 4 del parcial]_
