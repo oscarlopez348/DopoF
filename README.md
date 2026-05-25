@@ -132,11 +132,6 @@ Clases nuevas/modificadas:
 - **`GestorPartida`** — persiste `pulso_activo` y `pulso_tiempo` al guardar
 - **`LectorConfiguracion`** — reconoce el token `PU` en el `.txt`
 
-#### Diseño de comportamiento (diagramas de secuencia)
-
-> _[Secuencia 1: jugador pisa MonedaPulso → Nivel.recogerMonedasEn → activarPulso() → pulsoActivo=true, tiempoRestante=3.0 → jugador.aplicarSkinTemporal("Pulso")]_
-
-> _[Secuencia 2: tick del juego con pulso activo → timerLogica llama descontarTiempoPulso(0.25) → si tiempoRestante≤0, pulsoActivo=false → enemigos retoman movimiento en siguiente tick]_
 
 #### Código — capa presentación
 
