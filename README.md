@@ -1,7 +1,5 @@
-# DOPO Hardest Game — Parcial Tercer Tercio (2026-1)
 
-**Nombre:** ________________________________________  
-**Nota esperada:** _____
+**Nombre:** Oscar Daniel Lopez Cruz  
 
 ---
 
