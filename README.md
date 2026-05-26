@@ -48,6 +48,22 @@ javac -d out $sources
 ```powershell
 java -cp out Main
 ```
+## Ejecutar pruebas (Tests)
+
+**1. Los JARs de JUnit ya están incluidos en la carpeta lib/**
+
+**2. Compilar**
+```powershell
+$sources = Get-ChildItem -Recurse -Filter "*.java" src | Select-Object -ExpandProperty FullName
+$tests = Get-ChildItem -Recurse -Filter "*.java" test | Select-Object -ExpandProperty FullName
+javac -d out -cp "lib/*" ($sources + $tests)
+```
+
+**3. Ejecutar tests**
+```powershell
+java -jar "lib\junit-platform-console-standalone-1.10.2.jar" --scan-classpath --classpath out
+```
+
 
 
 
