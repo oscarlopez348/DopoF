@@ -109,25 +109,6 @@ Problemas concretos:
 | R-01 | Cuando el jugador pisa una `MonedaAmarilla`, esta se marca como recolectada y suma al conteo del nivel |
 | R-02 | Cuando el jugador pisa una `MonedaSkin`, esta se marca como recolectada y el jugador cambia su skin temporalmente |
 | R-03 | El efecto de la moneda se aplica en `Nivel.recogerMonedasEn()` usando `instanceof` para distinguir el tipo |
-
-#### Diseño estructural (zona del diagrama de clases relevante)
-
-```
-«abstract»
-Moneda
-+ recolectar(Cuadrado)
-+ getColor(): String  ← abstracto
-
-    ▲               ▲
-    |               |
-MonedaAmarilla   MonedaSkin
-getColor()       getColor()
-                 getSkinAsociado()
-
-Nivel ──usa──> Moneda
-Nivel ──conoce──> MonedaSkin  ← acoplamiento incorrecto
-```
-
 #### Código — capa aplicación (actual con el problema)
 
 ```java
