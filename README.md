@@ -21,6 +21,35 @@ WORLDS HARDEST GAME/
 └── recursos/
     └── niveles/            (nivel1.txt, nivel2.txt, nivel3.txt)
 ```
+## Ejecución desde consola (Windows)
+
+### Requisitos
+- Java JDK instalado
+
+### Pasos
+
+**1. Clonar o descargar el repositorio**
+```bash
+git clone https://github.com/fg08416-rgb/worlds-hardest-game.git
+```
+O descargar el ZIP desde GitHub → botón verde <> Code → Download ZIP y descomprimir.
+
+**2. Abrir PowerShell en la carpeta del proyecto**
+
+Dentro de la carpeta luego de descomprimir entrar a la subcarpeta WORLDS HARDEST GAME, hacer clic en la barra de direcciones, escribir powershell y presionar Enter.
+
+**3. Compilar**
+```powershell
+$sources = Get-ChildItem -Recurse -Filter "*.java" src | Select-Object -ExpandProperty FullName
+javac -d out $sources
+```
+
+**4. Ejecutar**
+```powershell
+java -cp out Main
+```
+
+
 
 ---
 
