@@ -30,7 +30,7 @@ WORLDS HARDEST GAME/
 
 **1. Clonar o descargar el repositorio**
 ```bash
-git clone https://github.com/fg08416-rgb/worlds-hardest-game.git
+git clone  https://github.com/oscarlopez348/DopoF.git
 ```
 O descargar el ZIP desde GitHub → botón verde <> Code → Download ZIP y descomprimir.
 
